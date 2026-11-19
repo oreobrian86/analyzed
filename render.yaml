@@ -1,0 +1,43 @@
+# Render Blueprint: Dashboard → New → Blueprint → chọn repo này.
+# Secret (sync: false) sẽ được Render hỏi khi tạo, không nằm trong repo.
+services:
+  - type: web
+    name: tiktok-intel-api
+    runtime: docker
+    plan: free
+    region: singapore
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: PUBLIC_BASE_URL
+        sync: false
+      - key: ALLOWED_EMAILS
+        sync: false
+      - key: ADMIN_EMAILS
+        sync: false
+      - key: AI_PROVIDER
+        value: gemini
+      - key: GEMINI_VIDEO_MODEL
+        value: gemini-3.5-flash
+      - key: GEMINI_TEXT_MODEL
+        value: gemini-3.5-flash
+      - key: GEMINI_EMBED_MODEL
+        value: gemini-embedding-001
+      - key: WORKER_CONCURRENCY
+        value: "1"
+      - key: AI_REQUESTS_PER_MINUTE
+        value: "8"

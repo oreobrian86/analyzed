@@ -1,0 +1,9 @@
+fastapi>=0.115,<1
+uvicorn[standard]>=0.30,<1
+python-multipart>=0.0.9
+httpx>=0.27,<1
+psycopg[binary,pool]>=3.2,<4
+numpy>=2.0,<3
+scikit-learn>=1.5,<2
+# Không khoá version yt-dlp: TikTok đổi liên tục, mỗi lần build Docker lấy bản mới nhất
+yt-dlp
