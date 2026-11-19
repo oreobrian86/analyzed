@@ -51,7 +51,10 @@ def _verify_with_supabase(token: str) -> dict:
         raise HTTPException(503, "Không kết nối được dịch vụ đăng nhập (Supabase). Thử lại sau.")
     if r.status_code != 200:
         raise HTTPException(401, "Phiên đăng nhập không hợp lệ hoặc đã hết hạn. Hãy đăng nhập lại.")
-    data = r.json()
+    try:
+        data = r.json()
+    except ValueError:
+        raise HTTPException(503, "SUPABASE_URL trên server bị sai (phải dạng https://xxxx.supabase.co).")
     with _cache_lock:
         if len(_cache) > 2000:
             _cache.clear()
