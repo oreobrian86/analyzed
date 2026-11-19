@@ -147,7 +147,8 @@ def handle(job: dict) -> None:
             src = ytdlp.download(info, td)
         _stage(v["id"], "FFmpeg: chuẩn hoá, phát hiện cắt cảnh, keyframe")
         norm, media_meta, frames = pipeline.prepare(src, td)
-        src.unlink(missing_ok=True)
+        if norm != src:
+            src.unlink(missing_ok=True)
 
         kf_paths = []
         for f in frames:
@@ -162,7 +163,7 @@ def handle(job: dict) -> None:
         _stage(v["id"], f"AI phân tích ({mode})")
         transcript_hint = None
         if mode == "video":
-            media = [MediaPart("video", norm, "video/mp4")]
+            media = [MediaPart("video", norm, media_meta.get("mime") or "video/mp4")]
         else:
             media = [MediaPart("image", f, "image/jpeg") for f in frames] if vp.supports_images else []
             if vp.supports_transcription and media_meta.get("has_audio"):
