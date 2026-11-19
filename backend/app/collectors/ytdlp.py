@@ -67,23 +67,23 @@ def fetch_metadata(url: str) -> tuple[CollectedVideo, dict]:
 
 
 def download(info: dict, dest_dir: Path) -> Path:
-    """Tải file từ info đã extract (không request trang TikTok lần 2)."""
+    """Tải file video (gọi yt-dlp lại từ URL). Ưu tiên H.264 ≤720p: nhẹ, FFmpeg xử lý nhanh."""
     import yt_dlp
 
-    max_bytes = settings.max_download_mb * 1024 * 1024
+    url = info.get("webpage_url") or info.get("original_url") or info.get("url")
     opts = _opts(
         noplaylist=True,
         outtmpl=str(dest_dir / "source.%(ext)s"),
-        format=f"best[height<=1080][filesize<?{settings.max_download_mb}M]/best",
-        max_filesize=max_bytes,
+        format="best[vcodec^=h264][height<=720]/best[vcodec^=avc][height<=720]/best[height<=720]/best",
+        max_filesize=settings.max_download_mb * 1024 * 1024,
         overwrites=True,
     )
     try:
         with yt_dlp.YoutubeDL(opts) as ydl:
-            ydl.process_ie_result(info, download=True)
+            ydl.extract_info(url, download=True)
     except Exception as e:
-        raise CollectorError(f"Tải video thất bại: {str(e)[:300]}")
-    files = [p for p in dest_dir.glob("source.*") if p.suffix not in (".part", ".ytdl")]
+        raise CollectorError(f"Tải video thất bại: {str(e)[:300]}") from e
+    files = [p for p in dest_dir.glob("source*") if p.is_file() and p.suffix not in (".part", ".ytdl", ".jpg", ".webp", ".json")]
     if not files:
         raise CollectorError(f"Không tải được video (có thể vượt {settings.max_download_mb} MB hoặc bị chặn).")
-    return files[0]
+    return max(files, key=lambda p: p.stat().st_size)
